@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import * as Progress from 'react-native-progress';
+// import * as Progress from 'react-native-progress';
 import DocumentPicker from 'react-native-document-picker';
 
 const UploadScreen = () => {
@@ -47,7 +47,7 @@ const UploadScreen = () => {
             {uploading && (
                 <View style={styles.progressContainer}>
                     <Text style={styles.progressText} >Uploading...</Text>
-                    <Progress.Bar progress={uploadProgress} width={200} />
+                    {/*<Progress.Bar progress={uploadProgress} width={200} />*/}
                 </View>
             )}
         </View>

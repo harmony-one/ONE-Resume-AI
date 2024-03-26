@@ -1,6 +1,6 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import {NavigationContainer} from '@react-navigation/native';
+import {createStackNavigator} from '@react-navigation/stack';
 import UploadScreen from './src/uploadScreen';
 
 const Stack = createStackNavigator();
@@ -19,9 +19,11 @@ const App = () => {
             fontSize: 20, // Set the font size of the title
             // fontFamily: 'YourCustomFont', // Uncomment and set your custom font if you have one
           },
-        }}
-      >
-        <Stack.Screen name="ONE Resume: AI for Job Matching" component={UploadScreen} />
+        }}>
+        <Stack.Screen
+          name="ONE Resume: AI for Job Matching"
+          component={UploadScreen}
+        />
         {/* Add more screens as needed */}
       </Stack.Navigator>
     </NavigationContainer>
