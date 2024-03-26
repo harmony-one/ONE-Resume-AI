@@ -6,31 +6,44 @@ import DocumentPicker from 'react-native-document-picker';
 const UploadScreen = () => {
     const [uploadProgress, setUploadProgress] = useState(0);
     const [uploading, setUploading] = useState(false);
+    const [responseMessage, setResponseMessage] = useState('');
 
     const uploadFile = async () => {
         try {
             const res = await DocumentPicker.pick({
                 type: [DocumentPicker.types.pdf],
             });
-
             setUploading(true);
             setUploadProgress(0);
+            setResponseMessage('');  // Reset message on new upload
+            const formData = new FormData();
+            formData.append('pdf', {
+                uri: res[0].uri,
+                type: res[0].type,
+                name: res[0].name,
+            });
+            formData.append('model', 'claude-3-haiku-20240307');
+            formData.append('system', 'You are tasked with reviewing a CV and providing three concise recommendations for improvement in one paragraph. The goal is to help the CV stand out more effectively to potential employers. Specifically, focus on tailoring the CV to match job descriptions, quantifying achievements to demonstrate impact, and including relevant keywords to optimize visibility. Write a paragraph outlining these improvements, ensuring clarity and specificity in your suggestions to assist the CV owner in enhancing their document effectively.');
+            formData.append('maxTokens', '1000');
+            const response = await fetch('YOUR_API_ENDPOINT', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                onUploadProgress: progressEvent => {
+                    const progress = progressEvent.loaded / progressEvent.total;
+                    setUploadProgress(progress);
+                },
+            });
 
-            // Simulate file upload progress
-            const interval = setInterval(() => {
-                setUploadProgress(currentProgress => {
-                    const nextProgress = currentProgress + 0.1;
-                    if (nextProgress >= 1) {
-                        clearInterval(interval);
-                        setUploading(false);
-                    }
-                    return nextProgress;
-                });
-            }, 500);
+            const jsonResponse = await response.json();
+            console.log('Upload complete:', jsonResponse);
+            setResponseMessage(jsonResponse.message);
 
-            // TODO: Implement actual file upload logic here
-            console.log('Uploading:', res.name);
+            setUploading(false);
         } catch (err) {
+            setUploading(false);
             if (DocumentPicker.isCancel(err)) {
                 console.log('User cancelled the document picker');
             } else {
@@ -46,8 +59,13 @@ const UploadScreen = () => {
             </TouchableOpacity>
             {uploading && (
                 <View style={styles.progressContainer}>
-                    <Text style={styles.progressText} >Uploading...</Text>
+                    <Text style={styles.progressText}>Uploading...</Text>
                     <Progress.Bar progress={uploadProgress} width={200} />
+                </View>
+            )}
+            {responseMessage && (
+                <View style={styles.messageContainer}>
+                    <Text style={styles.messageText}>{responseMessage}</Text>
                 </View>
             )}
         </View>
@@ -65,22 +83,36 @@ const styles = StyleSheet.create({
         padding: 15,
         borderRadius: 25,
         borderColor: 'white',
-        borderWidth: 1,  // If you want a border, set the borderWidth
-        backgroundColor: '#404040',  // Set the background color
+        borderWidth: 1,
+        backgroundColor: '#404040',
     },
     buttonText: {
         color: 'white',
         fontSize: 16,
-        alignItems: "center"
+        textAlign: 'center',
     },
     progressText: {
         color: 'white',
         fontSize: 10,
-        alignItems: "center"
+        textAlign: 'center',
     },
     progressContainer: {
         marginTop: 20,
         alignItems: 'center',
+    },
+     // Add your styles here
+     messageContainer: {
+        marginTop: 20,
+        padding: 15,
+        alignItems: 'center',
+        borderRadius: 30,
+        borderWidth: 1,
+        borderColor: 'white',
+    },
+    messageText: {
+        color: 'white',
+        fontSize: 16,
+      //  textAlign: 'center',
     },
 });
 

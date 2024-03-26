@@ -3,6 +3,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import UploadScreen from './src/uploadScreen';
 import codePush from 'react-native-code-push';
 import React, { useEffect, useState } from 'react';
+import { Modal, View, Text, ActivityIndicator } from 'react-native';
+
 
 const Stack = createStackNavigator();
 let codePushOptions = {
