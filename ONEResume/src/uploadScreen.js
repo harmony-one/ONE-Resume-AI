@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView}from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar}from 'react-native';
 import * as Progress from 'react-native-progress';
 import DocumentPicker from 'react-native-document-picker';
 
@@ -23,9 +23,9 @@ const UploadScreen = () => {
                 name: res[0].name,
             });
             formData.append('model', 'claude-3-haiku-20240307');
-            formData.append('system', 'You are tasked with reviewing a CV and providing three concise recommendations for improvement in one paragraph. The goal is to help the CV stand out more effectively to potential employers. Specifically, focus on tailoring the CV to match job descriptions, quantifying achievements to demonstrate impact, and including relevant keywords to optimize visibility. Write a paragraph outlining these improvements, ensuring clarity and specificity in your suggestions to assist the CV owner in enhancing their document effectively.');
-            formData.append('maxTokens', '1000');
-            const response = await fetch('https://harmony-llm-api-dev.fly.dev/anthropic/pdf/inquiry', { 
+            formData.append('jobDescription', 'Project managers are responsible for planning and overseeing projects to ensure they are completed on time and within budget. They identify the projects goals, objectives, and scope, and create a project plan that outlines the tasks, timelines, and resources required. They also communicate with the project team and stakeholders, manage risks and issues, and monitor progress');
+            formData.append('maxTokens', '1024');
+            const response = await fetch('https://harmony-llm-api-dev.fly.dev/anthropic/cv/analyze', { 
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -38,15 +38,17 @@ const UploadScreen = () => {
             });
 
             const jsonResponse = await response.json();
-           const parsedData = JSON.parse(jsonResponse);
+            console.log('jsonResponse:', jsonResponse);
+         //  const parsedData = JSON.parse(jsonResponse);
+         setResponseMessage(jsonResponse);
 
-          if (parsedData && parsedData.content && Array.isArray(parsedData.content) && parsedData.content.length > 0) {
-            const message = parsedData.content[0].text;
-            console.log('Recommendations:', message);
-            setResponseMessage(message);
-        } else {
-            console.log('Content is not an array or is empty', jsonResponse);
-        }
+        //   if (parsedData && parsedData.content && Array.isArray(parsedData.content) && parsedData.content.length > 0) {
+        //     const message = parsedData.content[0].text;
+        //     console.log('Recommendations:', message);
+        //     setResponseMessage(message);
+        // } else {
+        //     console.log('Content is not an array or is empty', jsonResponse);
+        // }
             setUploading(false);
         } catch (err) {
             setUploading(false);
@@ -61,6 +63,7 @@ const UploadScreen = () => {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
+            <StatusBar hidden={true} />
                 <TouchableOpacity style={styles.button} onPress={uploadFile}>
                     <Text style={styles.buttonText}>Upload Resume</Text>
                 </TouchableOpacity>
