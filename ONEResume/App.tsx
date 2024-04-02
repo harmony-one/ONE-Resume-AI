@@ -4,6 +4,8 @@ import UploadScreen from './src/uploadScreen';
 import codePush from 'react-native-code-push';
 import React, { useEffect, useState } from 'react';
 import { Modal, View, Text, ActivityIndicator } from 'react-native';
+import ChatScreen from './src/chatScreen';
+
 
 
 const Stack = createStackNavigator();
@@ -38,8 +40,10 @@ const App = () => {
             // fontFamily: 'YourCustomFont', // Uncomment and set your custom font if you have one
           },
         }}
+        initialRouteName="ONE Resume: AI for Job Matching" // Ensure this matches the name of the initial screen
       >
         <Stack.Screen name="ONE Resume: AI for Job Matching" component={UploadScreen} />
+        <Stack.Screen name="Chat" component={ChatScreen} />
         {/* Add more screens as needed */}
       </Stack.Navigator>
     </NavigationContainer>

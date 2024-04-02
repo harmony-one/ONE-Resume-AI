@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar}from 'react-native';
 import * as Progress from 'react-native-progress';
 import DocumentPicker from 'react-native-document-picker';
+import { useNavigation } from '@react-navigation/native';
 
 const UploadScreen = () => {
     const [uploadProgress, setUploadProgress] = useState(0);
     const [uploading, setUploading] = useState(false);
     const [responseMessage, setResponseMessage] = useState('');
+    const navigation = useNavigation();
 
     const uploadFile = async () => {
         try {
@@ -81,6 +83,9 @@ const UploadScreen = () => {
                     </View>
                 )}
             </ScrollView>
+            <TouchableOpacity style={styles.chatButton} onPress={() => navigation.navigate('Chat')}>
+                <Text style={styles.chatButtonText}>Chat with Us</Text>
+            </TouchableOpacity>
         </View>
     );
 };
@@ -127,6 +132,16 @@ const styles = StyleSheet.create({
         color: '#333333',  // Text color for the message
         fontSize: 14,  // Font size for the message
         textAlign: 'justify',  // Justify text for better readability
+    },
+    chatButton: {
+        padding: 10,
+        backgroundColor: '#0088cc',  // Adjust the color to match your theme
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    chatButtonText: {
+        color: '#ffffff',
+        fontSize: 16,
     },
 });
 
