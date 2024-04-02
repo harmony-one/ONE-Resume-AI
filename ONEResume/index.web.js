@@ -1,6 +1,6 @@
 import {AppRegistry} from 'react-native';
 import name from './app.json';
-import App from './App';
+import App from './AppWeb';
 
 AppRegistry.registerComponent(name, () => App);
 AppRegistry.runApplication(name, {

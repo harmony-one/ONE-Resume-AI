@@ -46,7 +46,7 @@ const App = () => {
   );
 };
 
-function codePushStatusDidChange(syncStatus) {
+function codePushStatusDidChange(syncStatus: any) {
   switch (syncStatus) {
     case codePush.SyncStatus.CHECKING_FOR_UPDATE:
       console.log("Checking for update.")
