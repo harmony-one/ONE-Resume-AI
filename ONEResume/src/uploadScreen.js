@@ -83,7 +83,7 @@ const UploadScreen = () => {
                     </View>
                 )}
             </ScrollView>
-            <TouchableOpacity style={styles.chatButton} onPress={() => navigation.navigate('Chat')}>
+            <TouchableOpacity style={styles.chatButton} onPress={() => navigation.navigate('FileChatScreen')}>
                 <Text style={styles.chatButtonText}>Chat with Us</Text>
             </TouchableOpacity>
         </View>
@@ -147,3 +147,5 @@ const styles = StyleSheet.create({
 
 
 export default UploadScreen;
+
+

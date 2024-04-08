@@ -1,14 +1,30 @@
-import React, { useState } from 'react';
 import { View, TextInput, Button, FlatList, Text, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
+import React, { useState, useCallback, useEffect } from 'react'
+import { GiftedChat } from 'react-native-gifted-chat'
 
 const ChatScreen = () => {
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
 
+    useEffect(() => {
+        setMessages([
+          {
+            _id: 1,
+            text: 'Hello developer',
+            createdAt: new Date(),
+            user: {
+              _id: 2,
+              name: 'React Native',
+              avatar: 'https://placeimg.com/140/140/any',
+            },
+          },
+        ])
+      }, [])
+
     const sendMessageToTelegram = async (text) => {
         const chatId = '1242'; // The chat ID for the conversation
-        const token = 'Your Telegram bot token'; // Your Telegram bot token
+        const token = '7026533283:AAE9shLTM-ZHnCTtNYz6Mctqkgb6CKMZABM'; // Your Telegram bot token
         const url = `https://api.telegram.org/bot${token}/sendMessage`;
 
         try {
@@ -39,25 +55,42 @@ const ChatScreen = () => {
         }
     };
 
-    return (
-        <View style={styles.container}>
-            <FlatList
-                style={styles.messageList}
-                data={messages}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                    <Text style={styles.message}>{item.text}</Text>
-                )}
-            />
-            <TextInput
-                style={styles.input}
-                value={message}
-                onChangeText={setMessage}
-                placeholder="Type a message"
-            />
-            <Button title="Send" onPress={sendMessage} />
-        </View>
-    );
+//     return (
+//         <View style={styles.container}>
+//             <FlatList
+//                 style={styles.messageList}
+//                 data={messages}
+//                 keyExtractor={(item) => item.id}
+//                 renderItem={({ item }) => (
+//                     <Text style={styles.message}>{item.text}</Text>
+//                 )}
+//             />
+//             <TextInput
+//                 style={styles.input}
+//                 value={message}
+//                 onChangeText={setMessage}
+//                 placeholder="Type a message"
+//             />
+//             <Button title="Send" onPress={sendMessage} />
+//         </View>
+//     );
+// };
+
+const onSend = useCallback((messages = []) => {
+    setMessages(previousMessages =>
+      GiftedChat.append(previousMessages, messages),
+    )
+  }, [])
+
+return (
+    <GiftedChat
+      messages={messages}
+      onSend={messages => onSend(messages)}
+      user={{
+        _id: 1,
+      }}
+    />
+  );
 };
 
 const styles = StyleSheet.create({
