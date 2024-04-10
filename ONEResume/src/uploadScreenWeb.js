@@ -14,7 +14,7 @@ const UploadScreen = () => {
 
     useEffect(() => {
         if(filesContent) {
-
+            uploadFile()
         }
     }, [filesContent]);
 
@@ -28,14 +28,16 @@ const UploadScreen = () => {
             setUploadProgress(0);
             setResponseMessage('');  // Reset message on new upload
             const formData = new FormData();
+            console.log('filesContent', filesContent)
             formData.append('pdf', {
-                uri: filesContent[0].uri,
+                uri: 'test',
                 type: filesContent[0].type,
                 name: filesContent[0].name,
             });
             formData.append('model', 'claude-3-haiku-20240307');
             formData.append('jobDescription', 'Project managers are responsible for planning and overseeing projects to ensure they are completed on time and within budget. They identify the projects goals, objectives, and scope, and create a project plan that outlines the tasks, timelines, and resources required. They also communicate with the project team and stakeholders, manage risks and issues, and monitor progress');
             formData.append('maxTokens', '1024');
+            console.log('formData', formData)
             const response = await fetch('https://harmony-llm-api-dev.fly.dev/anthropic/cv/analyze', {
                 method: 'POST',
                 body: formData,
@@ -60,7 +62,7 @@ const UploadScreen = () => {
             // } else {
             //     console.log('Content is not an array or is empty', jsonResponse);
             // }
-        } catch (err) {
+        } catch (e) {
             console.error('Failed to upload file:', e)
         } finally {
             setUploading(false);
@@ -84,11 +86,11 @@ const UploadScreen = () => {
                         {/*<Progress.Bar progress={uploadProgress} width={200} />*/}
                     </View>
                 )}
-                {responseMessage && (
-                    <View style={styles.messageContainer}>
-                        <Text style={styles.messageText}>{responseMessage}</Text>
-                    </View>
-                )}
+                {/*{responseMessage && (*/}
+                {/*    <View style={styles.messageContainer}>*/}
+                {/*        <Text style={styles.messageText}>{responseMessage}</Text>*/}
+                {/*    </View>*/}
+                {/*)}*/}
             </ScrollView>
             <TouchableOpacity style={styles.chatButton} onPress={() => navigation.navigate('FileChatScreen')}>
                 <Text style={styles.chatButtonText}>Chat with Us</Text>
