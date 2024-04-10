@@ -1,6 +1,6 @@
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
-import UploadScreen from './src/uploadScreen';
+import UploadScreen from './src/uploadScreenWeb';
 import React from 'react';
 
 const Stack = createStackNavigator();

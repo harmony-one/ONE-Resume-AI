@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import Pdf from 'react-native-pdf';
 
-function InChatViewFile({props, visible, onClose}) {
+function InChatViewFile({props, visible, onClose}: any) {
   const {currentMessage} = props;
   return (
     <Modal
