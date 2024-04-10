@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, Text, StyleSheet, Image} from 'react-native';
 
-const InChatFileTransfer = ({filePath}) => {
+const InChatFileTransfer = ({filePath}: any) => {
   var fileType = '';
   var name = '';
   if (filePath !== undefined) {

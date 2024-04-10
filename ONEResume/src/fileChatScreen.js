@@ -10,10 +10,6 @@ import * as DocumentPicker from 'react-native-document-picker';
 import { useNavigation } from '@react-navigation/native';
 //Project managers are responsible for planning and overseeing projects to ensure they are completed on time and within budget. They identify the projects goals, objectives, and scope, and create a project plan that outlines the tasks, timelines, and resources required. They also communicate with the project team and stakeholders, manage risks and issues, and monitor progress
 
-interface File extends IMessage {
-    url?: string;
-}
-
 const FileChatScreen = () => {
     const [isAttachImage, setIsAttachImage] = useState(false);
     const [isAttachFile, setIsAttachFile] = useState(false);
