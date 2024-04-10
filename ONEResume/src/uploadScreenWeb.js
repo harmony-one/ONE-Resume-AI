@@ -13,13 +13,13 @@ const UploadScreen = () => {
     });
 
     useEffect(() => {
-        if(filesContent) {
+        if(filesContent.length) {
             uploadFile()
         }
     }, [filesContent]);
 
     const uploadFile = async () => {
-        if(!filesContent) {
+        if(!filesContent.length) {
             console.error('Missing filesContent, exit')
             return false
         }
