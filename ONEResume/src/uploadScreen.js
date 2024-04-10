@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -6,14 +6,72 @@ import {
   StyleSheet,
   ScrollView,
   StatusBar,
+  Platform,
 } from 'react-native';
 // import * as Progress from 'react-native-progress';
 import DocumentPicker from 'react-native-document-picker';
+import {useFilePicker} from 'use-file-picker';
 
 const UploadScreen = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
   const [responseMessage, setResponseMessage] = useState('');
+  const {
+    openFilePicker: openWebFilePicker,
+    filesContent: webFileContent,
+    loading,
+  } = useFilePicker({
+    accept: '.pdf',
+  });
+
+  const uploadFileToService = async () => {
+    try {
+      setUploading(true);
+      setUploadProgress(0);
+      setResponseMessage(''); // Reset message on new upload
+      const formData = new FormData();
+
+      formData.append('pdf', {
+        // uri: res[0].uri,
+        // type: res[0].type,
+        name: webFileContent[0].name,
+      });
+      formData.append('model', 'claude-3-haiku-20240307');
+      formData.append(
+        'jobDescription',
+        'Project managers are responsible for planning and overseeing projects to ensure they are completed on time and within budget. They identify the projects goals, objectives, and scope, and create a project plan that outlines the tasks, timelines, and resources required. They also communicate with the project team and stakeholders, manage risks and issues, and monitor progress',
+      );
+      formData.append('maxTokens', '1024');
+      const response = await fetch(
+        'https://harmony-llm-api-dev.fly.dev/anthropic/cv/analyze',
+        {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          onUploadProgress: progressEvent => {
+            const progress = progressEvent.loaded / progressEvent.total;
+            setUploadProgress(progress);
+          },
+        },
+      );
+
+      const jsonResponse = await response.json();
+      console.log('jsonResponse:', jsonResponse);
+      //  const parsedData = JSON.parse(jsonResponse);
+      setResponseMessage(jsonResponse);
+    } catch (e) {
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (webFileContent) {
+      uploadFileToService();
+    }
+  }, [webFileContent]);
 
   const uploadFile = async () => {
     try {
@@ -73,11 +131,23 @@ const UploadScreen = () => {
     }
   };
 
+  const uploadFileWeb = () => {
+    openWebFilePicker();
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <StatusBar hidden={true} />
-        <TouchableOpacity style={styles.button} onPress={uploadFile}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={e => {
+            if (Platform.OS === 'web') {
+              uploadFileWeb();
+            } else {
+              uploadFile(e);
+            }
+          }}>
           <Text style={styles.buttonText}>Upload Resume</Text>
         </TouchableOpacity>
       </View>

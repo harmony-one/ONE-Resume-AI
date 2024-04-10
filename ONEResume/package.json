@@ -36,6 +36,7 @@
     "save-dev": "^0.0.1-security",
     "ts-loader": "^9.5.1",
     "url-loader": "^4.1.1",
+    "use-file-picker": "^2.1.1",
     "webpack": "^5.91.0",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.0.4"
