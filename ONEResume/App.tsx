@@ -4,13 +4,14 @@ import UploadScreen from './src/uploadScreen';
 import codePush from 'react-native-code-push';
 import React, { useEffect, useState } from 'react';
 import { Modal, View, Text, ActivityIndicator } from 'react-native';
-
+import ChatScreen from './src/chatScreen';
+import FileChatScreen from './src/fileChatScreen';
 
 const Stack = createStackNavigator();
 let codePushOptions = {
   checkFrequency: codePush.CheckFrequency.ON_APP_RESUME,
   installMode: codePush.InstallMode.IMMEDIATE,
- updateDialog: true,
+  updateDialog: true,
 };
 
 
@@ -29,17 +30,19 @@ const App = () => {
       <Stack.Navigator
         screenOptions={{
           headerStyle: {
-            backgroundColor: '#404040', // Set the background color of the header
+            backgroundColor: '#00AEE9', // Set the background color of the header
           },
           headerTintColor: '#fff', // Set the color of the header text and icons
           headerTitleStyle: {
-            fontWeight: 'bold', // Set the font weight of the title
-            fontSize: 20, // Set the font size of the title
-            // fontFamily: 'YourCustomFont', // Uncomment and set your custom font if you have one
+            fontFamily: 'YourCustomFont', // Uncomment and set your custom font if you have one
           },
         }}
+        // initialRouteName="ONE Resume: AI for Job Matching" // Ensure this matches the name of the initial screen
+        initialRouteName="FileChatScreen"
       >
         <Stack.Screen name="ONE Resume: AI for Job Matching" component={UploadScreen} />
+        <Stack.Screen name="Chat" component={ChatScreen} />
+        <Stack.Screen name="FileChatScreen" component={FileChatScreen} options={{ title: 'ONE Resume: AI' }} />
         {/* Add more screens as needed */}
       </Stack.Navigator>
     </NavigationContainer>
