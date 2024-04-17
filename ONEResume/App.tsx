@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { Modal, View, Text, ActivityIndicator } from 'react-native';
 import ChatScreen from './src/chatScreen';
 import FileChatScreen from './src/fileChatScreen';
+import Toast from 'react-native-toast-message';
 
 const Stack = createStackNavigator();
 let codePushOptions = {
@@ -13,8 +14,6 @@ let codePushOptions = {
   installMode: codePush.InstallMode.IMMEDIATE,
   updateDialog: true,
 };
-
-
 const App = () => {
   useEffect(() => {
     codePush.sync(
@@ -36,6 +35,7 @@ const App = () => {
           headerTitleStyle: {
             fontFamily: 'YourCustomFont', // Uncomment and set your custom font if you have one
           },
+          headerShown: false
         }}
         // initialRouteName="ONE Resume: AI for Job Matching" // Ensure this matches the name of the initial screen
         initialRouteName="FileChatScreen"
@@ -45,6 +45,7 @@ const App = () => {
         <Stack.Screen name="FileChatScreen" component={FileChatScreen} options={{ title: 'ONE Resume: AI' }} />
         {/* Add more screens as needed */}
       </Stack.Navigator>
+      <Toast />
     </NavigationContainer>
   );
 };

@@ -52,12 +52,15 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 	<key>CodePushDeploymentKey</key>
-	<string>PUT_YOUR_DEVELOPMENT_KEY_HERE-</string>
+	<string>9N3yRYuGV228_2_SOJnYCOU-_Uoi4IUM_0HU-</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>FontAwesome.ttf</string>
 		<string>FontAwesome5_Regular.ttf</string>
 		<string>FontAwesome6_Regular.ttf</string>
+		<string>Nunito-Bold.ttf</string>
+		<string>Nunito-Medium.ttf</string>
+		<string>Nunito-Regular.ttf</string>
 	</array>
 </dict>
 </plist>

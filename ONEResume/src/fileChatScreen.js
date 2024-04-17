@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { StyleSheet, View, TouchableOpacity, Image, Text, ActivityIndicator, StatusBar, Keyboard } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Image, Text, ActivityIndicator, StatusBar, KeyboardAvoidingView, ScrollView, TextInput, Keyboard } from 'react-native';
 import { Bubble, GiftedChat, Send, IMessage } from 'react-native-gifted-chat';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { Icon } from 'react-native-elements';
@@ -8,6 +8,10 @@ import InChatFileTransfer from './components/InChatFileTranfer';
 import InChatViewFile from './components/InChatViewFile';
 import * as DocumentPicker from 'react-native-document-picker';
 import { useNavigation } from '@react-navigation/native';
+import uuid from 'react-native-uuid';
+import Toast from 'react-native-toast-message';
+
+
 //Project managers are responsible for planning and overseeing projects to ensure they are completed on time and within budget. They identify the projects goals, objectives, and scope, and create a project plan that outlines the tasks, timelines, and resources required. They also communicate with the project team and stakeholders, manage risks and issues, and monitor progress
 
 interface File extends IMessage {
@@ -15,193 +19,24 @@ interface File extends IMessage {
 }
 
 const FileChatScreen = () => {
-    const [isAttachImage, setIsAttachImage] = useState(false);
-    const [isAttachFile, setIsAttachFile] = useState(false);
-    const [fileVisible, setFileVisible] = useState(false);
-    const [imagePath, setImagePath] = useState('');
+
     const [filePath, setFilePath] = useState('');
     const [uploading, setUploading] = useState(false); // State to track uploading
-    const [messages, setMessages] = useState([
-        {
-            _id: 1,
-            text: 'Welcome to ONE Resume! \nSubmit your resume with job description',
-            createdAt: new Date(),
-            user: {
-                _id: 1,
-                name: 'UserChat',
-                avatar: '',
-            },
-            image: '',
-            file: {
-                url: '',
-            }
-        },
-    ]);
-
+    const [documentName, setDocumentName] = useState('');
+    const [inputText, setInputText] = useState('');
+    const [nextId, setNextId] = useState(1);
+    const [messages, setMessages] = useState([]);
     const navigation = useNavigation();
 
-    const onSend = useCallback((messages = []) => {
-        const [messageToSend] = messages;
-
-        const sendMessage = async () => {
-            if (isAttachImage) {
-                const newMessage = {
-                    _id: messages[0]._id + 1,
-                    text: messageToSend.text,
-                    createdAt: new Date(),
-                    user: {
-                        _id: 2,
-                        avatar: '',
-                    },
-                    image: imagePath,
-                    file: {
-                        url: ''
-                    }
-                };
-                setMessages(previousMessages =>
-                    GiftedChat.append(previousMessages, newMessage),
-                );
-                setImagePath('');
-                setIsAttachImage(false);
-            } else if (isAttachFile) {
-                Keyboard.dismiss();
-
-                setUploading(true); // Start upload
-
-                try {
-                var name = filePath.split('/').pop();
-                const formData = new FormData();
-                formData.append('pdf', {
-                    uri: filePath,
-                    type: 'pdf',
-                    name: name.replace('%20', '').replace(' ', '')
-                });
-
-                console.log('messageToSend.text',  messageToSend.text);
-                formData.append('model', 'claude-3-haiku-20240307');
-                formData.append('jobDescription', messageToSend.text);
-                formData.append('maxTokens', '1024');
-                const response = await fetch('Add your API URL', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                const jsonResponse = await response.json();
-                console.log('jsonResponse:', jsonResponse);
-                setUploading(false); // End upload
-                // Use jsonResponse in your new message
-                const newMessage = {
-                    _id: messages[0]._id + 1,
-                    text: jsonResponse, // Example, adjust based on actual jsonResponse structure
-                    createdAt: new Date(),
-                    user: {
-                        _id: 1,
-                        avatar: '',
-                        name: 'UserChat',
-                    },
-                    file: {
-                        url: filePath,
-                    },
-                };
-
-                setMessages(previousMessages => GiftedChat.append(previousMessages, newMessage));
-                setFilePath('');
-                setIsAttachFile(false);
-
-            } catch (error) {
-                console.error('Error sending file:', error);
-                setUploading(false); // End upload in case of error
-            }
-            } else {
-
-                setMessages(previousMessages =>
-                    GiftedChat.append(previousMessages, messages),
-                );
-            }
-        };
-
-        sendMessage();
-    }, [filePath, imagePath, isAttachFile, isAttachImage, setMessages, setUploading]);
-
-    const renderSend = (props) => {
-        return (
-            <View style={{ flexDirection: 'row' }}>
-                <TouchableOpacity onPress={_pickDocument}>
-                    <Icon
-                        type="font-awesome"
-                        name="paperclip"
-                        style={styles.paperClip}
-                        size={28}
-                        color='#00AEE9'
-                    />
-                </TouchableOpacity>
-                <Send {...props}>
-                    <View style={styles.sendContainer}>
-                        <Icon
-                            type="font-awesome"
-                            name="send"
-                            style={styles.sendButton}
-                            size={25}
-                            color='#00AEE9'
-                        />
-                    </View>
-                </Send>
+    const Message = ({ isUser, text }) => (
+        <View style={isUser ? styles.messageTop : styles.messageTopUser} >
+            <Text style={styles.userName}>{isUser ? 'You' : 'Claude 3'}</Text>
+            <View style={[styles.message, isUser ? styles.userMessage : styles.botMessage]}>
+                <Text style={styles.messageText}>{text}</Text>
             </View>
-        );
-    };
+        </View>
+    );
 
-    const renderBubble = (props) => {
-        const { currentMessage } = props;
-        if (currentMessage.file && currentMessage.file.url) {
-            return (
-                <TouchableOpacity
-                    style={{
-                        ...styles.fileContainer,
-                        backgroundColor: props.currentMessage.user._id === 2 ? '#00AEE9' : '#efefef',
-                        borderBottomLeftRadius: props.currentMessage.user._id === 2 ? 15 : 5,
-                        borderBottomRightRadius: props.currentMessage.user._id === 2 ? 5 : 15,
-                    }}
-                    onPress={() => setFileVisible(true)}
-                >
-                    <InChatFileTransfer
-                        style={{ marginTop: -10 }}
-                        filePath={currentMessage.file.url}
-                    />
-                    <InChatViewFile
-                        props={props}
-                        visible={fileVisible}
-                        onClose={() => setFileVisible(false)}
-                    />
-                    <View style={{ flexDirection: 'column' }}>
-                        <Text style={{
-                            ...styles.fileText,
-                            color: currentMessage.user._id === 2 ? 'white' : 'black',
-                        }} >
-                            {currentMessage.text}
-                        </Text>
-                    </View>
-                </TouchableOpacity>
-            );
-        }
-        return (
-            <Bubble
-                {...props}
-                wrapperStyle={{
-                    right: {
-                        backgroundColor: '#00AEE9',
-                    },
-                }}
-                textStyle={{
-                    right: {
-                        color: '#efefef',
-                    },
-                }}
-            />
-        );
-    };
 
     // add a function attach file using DocumentPicker.pick
     const _pickDocument = async () => {
@@ -213,17 +48,62 @@ const FileChatScreen = () => {
                 allowMultiSelection: false,
             });
             const fileUri = result[0].fileCopyUri;
+            setDocumentName(result[0].name); // Set the uploaded document name
+            setFilePath(fileUri);
             console.log(fileUri);
+            //  setUploading(true); // End upload
+
+            // try {
+            //     var name = fileUri.split('/').pop();
+            //     const formData = new FormData();
+            //     formData.append('pdf', {
+            //         uri: fileUri,
+            //         type: 'pdf',
+            //         name: name.replace('%20', '').replace(' ', '')
+            //     });
+
+            //     // console.log('messageToSend.text', messageToSend.text);
+            //     formData.append('model', 'claude-3-haiku-20240307');
+            //     formData.append('jobDescription', "messageToSend.text");
+            //     formData.append('maxTokens', '1024');
+            //     const response = await fetch('API URL here', {
+            //         method: 'POST',
+            //         body: formData,
+            //         headers: {
+            //             'Content-Type': 'application/json',
+            //         },
+            //     });
+            //     const jsonResponse = await response.json();
+            //     console.log('jsonResponse:', jsonResponse);
+            //     setUploading(false); // End upload
+            //     const newMessage = {
+            //         isUser: false,
+            //         text: jsonResponse,
+            //         id: nextId, // simple id assignment
+
+            //     };
+            //     setMessages([...messages, newMessage]);
+            //     setNextId(prevId => prevId + 1);
+
+            //   //  setFilePath('');
+            //   //  setIsAttachFile(false);
+
+            // } catch (error) {
+            //     console.error('Error sending file:', error);
+            //     setUploading(false); // End upload in case of error
+            // }
+
+
             if (!fileUri) {
                 console.log('File URI is undefined or null');
                 return;
             }
             if (fileUri.indexOf('.png') !== -1 || fileUri.indexOf('.jpg') !== -1) {
-                setImagePath(fileUri);
-                setIsAttachImage(true);
+                //  setImagePath(fileUri);
+                // setIsAttachImage(true);
             } else {
-                setFilePath(fileUri);
-                setIsAttachFile(true);
+                // setFilePath(fileUri);
+                // setIsAttachFile(true);
             }
         } catch (err) {
             if (DocumentPicker.isCancel(err)) {
@@ -235,66 +115,202 @@ const FileChatScreen = () => {
         }
     };
 
-    const renderChatFooter = useCallback(() => {
-        if (imagePath) {
-            return (
-                <View style={styles.chatFooter}>
-                    <Image source={{ uri: imagePath }} style={{ height: 75, width: 75 }} />
-                    <TouchableOpacity
-                        onPress={() => setImagePath('')}
-                        style={styles.buttonFooterChatImg}
-                    >
-                        <Text style={styles.textFooterChat}>X</Text>
-                    </TouchableOpacity>
-                </View>
-            );
-        }
-        if (filePath) {
-            return (
-                <View style={styles.chatFooter}>
-                    <InChatFileTransfer
-                        filePath={filePath}
-                    />
-                    <TouchableOpacity
-                        onPress={() => setFilePath('')}
-                        style={styles.buttonFooterChat}
-                    >
-                        <Text style={styles.textFooterChat}>X</Text>
-                    </TouchableOpacity>
-                </View>
-            );
-        }
-        return null;
-    }, [filePath, imagePath]);
-
-    const scrollToBottomComponent = () => {
-        return <FontAwesome name="angle-double-down" size={22} color="#333" />;
+    // Dummy function to remove the uploaded document
+    const handleRemovePress = () => {
+        setDocumentName('');
+        setFilePath('');
+        setMessages([]);
     };
+
+    // Function to handle sending a message
+    const handleSendMessage = async () => {
+        if (!filePath) {
+            Toast.show({
+                type: 'error',
+                text1: 'Resume missing.',
+            });
+            return
+        }
+
+        if (!inputText) {
+
+            Toast.show({
+                type: 'error',
+                text1: 'Could you provide the job description, please?',
+            });
+            return
+
+        }
+        Keyboard.dismiss();
+
+        const userMessage = {
+            isUser: true,
+            text: inputText,
+            id: uuid.v4(), // simple id assignment
+
+        };
+        // Immediately add the user message to the messages list
+        setMessages(prevMessages => [...prevMessages, userMessage]);
+        try {
+
+            setUploading(true);
+            var name = filePath.split('/').pop();
+            console.log('filePath:', filePath);
+            const formData = new FormData();
+            formData.append('pdf', {
+                uri: filePath,
+                type: 'pdf',
+                name: name.replace('%20', '').replace(' ', '')
+            });
+
+            // console.log('messageToSend.text', messageToSend.text);
+            formData.append('model', 'claude-3-haiku-20240307');
+            formData.append('jobDescription', inputText);
+            formData.append('maxTokens', '1024');
+            const response = await fetch('API URL Here', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const jsonResponse = await response.json();
+            console.log('jsonResponse:', jsonResponse);
+            setUploading(false); // End upload
+            const newMessage = {
+                isUser: false,
+                text: jsonResponse,
+                id: uuid.v4() // simple id assignment
+
+            };
+            // Immediately add the user message to the messages list
+            setMessages(prevMessages => [...prevMessages, newMessage]);         
+            //  setIsAttachFile(false);
+
+        } catch (error) {
+            console.error('Error sending file:', error);
+            setUploading(false); // End upload in case of error
+        }
+    };
+
     return (
-        <View style={styles.container}>
-        <StatusBar hidden={true} />
-        {uploading && <ActivityIndicator style= {styles.activityIndicator} size="large" color="grey" />}
-            <GiftedChat
-                messages={messages}
-                onSend={messages => onSend(messages)}
-                user={{
-                    _id: 2,
-                }}
-                renderBubble={renderBubble}
-                alwaysShowSend
-                renderSend={renderSend}
-                scrollToBottom
-                scrollToBottomComponent={scrollToBottomComponent}
-                renderChatFooter={renderChatFooter}
-            />
-        </View>
+        <KeyboardAvoidingView
+            style={{ flex: 1, backgroundColor: '#292929' }}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+        >
+            <View style={styles.container}>
+                <StatusBar hidden={true} />
+                <View style={styles.topContiner}>
+                    <Text style={styles.titleText}>ONE Resume with Claude 3</Text>
+
+                    <View style={styles.uploadContainer}>
+                        {documentName ? (
+                            <View style={styles.uploadedDocumentButton}>
+                                <TouchableOpacity onPress={handleRemovePress}>
+                                    <Icon type="font-awesome" name="close" size={15} color="#fff" />
+                                </TouchableOpacity>
+                                <Text style={styles.documentName}>{documentName}</Text>
+                            </View>
+                        ) : (
+                            <TouchableOpacity onPress={_pickDocument} style={styles.uploadButton}>
+                                <Text style={styles.uploadButtonText}>Upload your resume  </Text>
+                                <Icon type="font-awesome" name="upload" size={15} color="#fff" />
+                            </TouchableOpacity>
+                        )}
+                    </View>
+                </View>
+                <ScrollView style={styles.messageContainer}>
+                    {uploading && <ActivityIndicator style={styles.activityIndicator} size="large" color="white" />}
+
+                    {messages.map(message => (
+                        <Message key={message.id} isUser={message.isUser} text={message.text} />
+                    ))}
+                </ScrollView>
+
+                <View style={styles.inputAreaContainer}>
+                    <View style={styles.inputArea}>
+                        <TextInput style={styles.input} placeholder="Message" placeholderTextColor="#D9D9D9" value={inputText}
+                            onChangeText={setInputText}   />
+                        <TouchableOpacity style={styles.sendButton} onPress={() => {
+                            handleSendMessage(inputText);
+                            setInputText('');
+                        }}>
+                            {/* Icon can be added here */}
+                            <Text style={styles.sendButtonText}>↑</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </View>
+        </KeyboardAvoidingView>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingBottom: 15
+        paddingBottom: 15,
+        backgroundColor: '#292929'
+    },
+
+    messageBox: {
+        marginLeft: 20,
+        paddingBottom: 10,
+        fontFamily: 'Nunito-Medium',
+        flexDirection: 'row',
+    },
+
+    titleText: {
+        marginTop: 65,
+        marginLeft: 20,
+        marginBottom: 10,
+        fontFamily: 'Nunito-Medium',
+        color: '#D9D9D9',
+        fontSize: 19
+    },
+
+    topContiner: {
+        borderBottomWidth: 1,
+        borderColor: '#D9D9D9'
+    },
+
+    uploadContainer: {
+        marginLeft: 20,
+        width: 200,
+        paddingBottom: 10
+    },
+    uploadedDocumentButton: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 20,
+        padding: 10,
+        borderWidth: 1.26,
+        borderColor: '#EAEAEA',
+        fontFamily: 'Nunito-Regular',
+    },
+    documentName: {
+        color: '#fff',
+        marginLeft: 10,
+        fontFamily: 'Nunito-Regular',
+        fontSize: 13.3
+    },
+    uploadButton: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 20,
+        padding: 10,
+        borderWidth: 1.26,
+        borderColor: '#EAEAEA',
+        fontFamily: 'Nunito-Regular',
+        fontSize: 13.3
+    },
+    uploadButtonText: {
+        color: '#fff',
+        fontFamily: 'Nunito-Regular',
+        fontSize: 13.3
     },
     paperClip: {
         marginTop: 8,
@@ -305,6 +321,8 @@ const styles = StyleSheet.create({
     sendContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
+        backgroundColor: 'red',
+        marginRight: 10
     },
     chatFooter: {
         shadowColor: '#1F2687',
@@ -367,9 +385,95 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: 'gray',
     },
-    activityIndicator : {
+    activityIndicator: {
         alignItems: 'center',
-    }
+        color: 'white'
+    },
+
+    messageContainer: {
+        flex: 1,
+    },
+    messageTop: {
+
+        borderBottomWidth: 1,
+        borderColor: '#D9D9D9',
+        backgroundColor: '#333', // Ligh
+
+    },
+
+    messageTopUser: {
+        borderBottomWidth: 1,
+        borderColor: '#D9D9D9'
+    },
+    message: {
+        padding: 10,
+        borderRadius: 20,
+        marginVertical: 5,
+        //  maxWidth: '70%',
+        alignSelf: 'flex-start',
+
+    },
+    userMessage: {
+        //  backgroundColor: '#333', // Lighter message bubble for user
+        // alignSelf: 'flex-end',
+
+        fontFamily: 'Nunito-Regular',
+        fontSize: 13.3
+    },
+    botMessage: {
+        //  backgroundColor: '#333', // Darker message bubble for bot
+    },
+    messageText: {
+        color: '#fff',
+        fontFamily: 'Nunito-Regular',
+        fontSize: 13.3
+    },
+
+    inputAreaContainer: {
+        padding: 20,
+        paddingBottom: 20
+    },
+    inputArea: {
+        flexDirection: 'row',
+        borderWidth: 1,
+        borderColor: '#D9D9D9',
+        borderRadius: 20
+    },
+    input: {
+        flex: 1,
+        paddingTop: 10,
+        marginRight: 10,
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+        borderRadius: 20,
+        color: '#fff',
+        width: '90%',
+        fontFamily: 'Nunito-Regular',
+        fontSize: 13.3,
+
+    },
+    sendButton: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 40,
+        height: 40,
+        backgroundColor: '#00AEE9',
+        borderRadius: 20,
+        padding: 10
+    },
+    sendButtonText: {
+        color: 'black',
+        fontSize: 18,
+    },
+
+    userName: {
+        paddingTop: 10,
+        fontFamily: 'Nunito-Regular',
+        fontSize: 13.3,
+        color: '#00AEE9',
+        paddingLeft: 10
+    },
+
 });
 
 export default FileChatScreen;
