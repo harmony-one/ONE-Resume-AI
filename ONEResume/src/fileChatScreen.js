@@ -163,15 +163,15 @@ const FileChatScreen = () => {
                 name: name.replace('%20', '').replace(' ', '')
             });
 
-            // console.log('messageToSend.text', messageToSend.text);
             formData.append('model', 'claude-3-haiku-20240307');
             formData.append('jobDescription', inputText);
             formData.append('maxTokens', '1024');
-            const response = await fetch('API URL Here', {
+            const response = await fetch('API_URL', {
                 method: 'POST',
                 body: formData,
                 headers: {
                     'Content-Type': 'application/json',
+                    Authorization: 'Bearer ${API_KEY}',
                 },
             });
 

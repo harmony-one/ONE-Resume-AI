@@ -1,10 +1,8 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import UploadScreen from './src/uploadScreen';
 import codePush from 'react-native-code-push';
 import React, { useEffect, useState } from 'react';
 import { Modal, View, Text, ActivityIndicator } from 'react-native';
-import ChatScreen from './src/chatScreen';
 import FileChatScreen from './src/fileChatScreen';
 import Toast from 'react-native-toast-message';
 
@@ -40,8 +38,6 @@ const App = () => {
         // initialRouteName="ONE Resume: AI for Job Matching" // Ensure this matches the name of the initial screen
         initialRouteName="FileChatScreen"
       >
-        <Stack.Screen name="ONE Resume: AI for Job Matching" component={UploadScreen} />
-        <Stack.Screen name="Chat" component={ChatScreen} />
         <Stack.Screen name="FileChatScreen" component={FileChatScreen} options={{ title: 'ONE Resume: AI' }} />
         {/* Add more screens as needed */}
       </Stack.Navigator>
